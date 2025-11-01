@@ -1,0 +1,22 @@
+title: AIクイズ生成アプリ
+description: 学習したい内容を入力するだけで、AIが自動的にクイズを生成する学習支援アプリです。
+author: usk99
+lang: ja
+theme: jekyll-theme-minimal
+
+# GitHub Pages設定
+plugins:
+    - jekyll-sitemap
+    - jekyll-feed
+
+# 除外するファイル
+exclude:
+    - node_modules/
+    - package.json
+    - package-lock.json
+    - server.js
+    - .env
+    - .env.example
+    - 仕様.txt
+    - prompt.txt
+    - sample.js

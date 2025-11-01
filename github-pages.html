@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>AIクイズ生成アプリ - GitHub Pages版</title>
+        <link rel="stylesheet" href="css/style.css" />
+        <meta
+            name="description"
+            content="学習したい内容を入力するだけで、AIが自動的にクイズを生成する学習支援アプリです。"
+        />
+        <meta name="keywords" content="AI,クイズ,学習,教育,Gemini" />
+
+        <!-- Gemini AI ライブラリ（ESM CDN経由） -->
+        <script type="importmap">
+            {
+                "imports": {
+                    "@google/generative-ai": "https://esm.run/@google/generative-ai"
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>📚 AIクイズ生成アプリ</h1>
+                <p>学習したい内容を入力すると、AIがクイズを自動生成します</p>
+                <div class="api-key-info">
+                    <small
+                        >⚠️ 初回利用時にGemini API キーの入力が必要です</small
+                    >
+                </div>
+            </header>
+
+            <main>
+                <!-- 入力セクション -->
+                <section class="input-section">
+                    <div class="input-group">
+                        <label for="studyContent"
+                            >学習内容を入力してください：</label
+                        >
+                        <textarea
+                            id="studyContent"
+                            placeholder="例：日本の歴史について学習したい、プログラミングの基礎概念を覚えたい、など..."
+                            rows="4"
+                        ></textarea>
+                    </div>
+                    <div class="input-controls">
+                        <div class="input-group quiz-count-group">
+                            <label for="quizCount">生成するクイズ数：</label>
+                            <select id="quizCount">
+                                <option value="1">1問</option>
+                                <option value="2">2問</option>
+                                <option value="3" selected>3問</option>
+                                <option value="5">5問</option>
+                                <option value="7">7問</option>
+                                <option value="10">10問</option>
+                            </select>
+                        </div>
+                        <button id="resetInputBtn" class="reset-btn">
+                            入力内容のリセット
+                        </button>
+                        <button id="generateBtn" class="generate-btn">
+                            <span class="btn-text">クイズを生成</span>
+                            <span class="spinner" style="display: none"
+                                >🔄</span
+                            >
+                        </button>
+                    </div>
+                </section>
+
+                <!-- クイズ表示セクション -->
+                <section class="quiz-section" style="display: none">
+                    <h2>📝 生成されたクイズ</h2>
+                    <div class="quiz-container">
+                        <div class="quiz-header">
+                            <span class="quiz-counter"
+                                >問題 <span id="currentQuiz">1</span> /
+                                <span id="totalQuiz">5</span></span
+                            >
+                            <span class="score"
+                                >正解数: <span id="score">0</span></span
+                            >
+                        </div>
+
+                        <div class="quiz-content">
+                            <div class="question">
+                                <p id="questionText">
+                                    問題文がここに表示されます
+                                </p>
+                            </div>
+
+                            <div class="options">
+                                <button class="option-btn" data-option="A">
+                                    <span class="option-label">A</span>
+                                    <span class="option-text">選択肢A</span>
+                                </button>
+                                <button class="option-btn" data-option="B">
+                                    <span class="option-label">B</span>
+                                    <span class="option-text">選択肢B</span>
+                                </button>
+                                <button class="option-btn" data-option="C">
+                                    <span class="option-label">C</span>
+                                    <span class="option-text">選択肢C</span>
+                                </button>
+                                <button class="option-btn" data-option="D">
+                                    <span class="option-label">D</span>
+                                    <span class="option-text">選択肢D</span>
+                                </button>
+                            </div>
+
+                            <div class="feedback" style="display: none">
+                                <p id="feedbackText"></p>
+                                <p id="explanationText"></p>
+                            </div>
+                        </div>
+
+                        <div class="quiz-controls">
+                            <button
+                                id="submitAnswer"
+                                class="control-btn"
+                                disabled
+                            >
+                                回答する
+                            </button>
+                            <button
+                                id="nextQuestion"
+                                class="control-btn next-btn"
+                                style="display: none"
+                            >
+                                次の問題
+                            </button>
+                            <button
+                                id="restartQuiz"
+                                class="control-btn restart-btn"
+                                style="display: none"
+                            >
+                                最初からやり直す
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 結果セクション -->
+                <section class="result-section" style="display: none">
+                    <h2>🎉 クイズ完了！</h2>
+                    <div class="result-card">
+                        <div class="result-score">
+                            <span class="final-score" id="finalScore">0</span>
+                            <span class="total-questions"
+                                >/ <span id="finalTotal">5</span> 問正解</span
+                            >
+                        </div>
+                        <div class="result-message" id="resultMessage">
+                            お疲れさまでした！
+                        </div>
+                        <div class="result-actions">
+                            <button id="backToTopBtn" class="control-btn">
+                                トップへ戻る
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- ES moduleとして読み込み -->
+        <script type="module" src="script/app-github-pages.js"></script>
+    </body>
+</html>
