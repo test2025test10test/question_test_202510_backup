@@ -1,6 +1,7 @@
 # 設計・仕様ファイル
 /仕様.txt
 /prompt.txt
+/GITHUB_PAGES_SETUP.md
 
 # 環境設定ファイル（APIキーが含まれるため）
 .env
