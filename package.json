@@ -1,5 +1,5 @@
 {
-    "name": "question_test_202510",
+    "name": "question_test_202510_backup",
     "version": "1.0.0",
     "description": "文字列を入力すると、AI が内容を判断してクイズを生成する勉強アプリです。",
     "main": "index.js",
