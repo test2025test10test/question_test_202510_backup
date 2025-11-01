@@ -477,6 +477,81 @@ select:disabled {
     color: #721c24;
 }
 
+/* Bearer token ボタン（画面端に目立たない固定表示） */
+.token-control {
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 6px;
+    border-radius: 999px;
+    backdrop-filter: blur(6px);
+    transition: transform 0.15s ease, opacity 0.15s ease;
+    opacity: 0.85;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    pointer-events: auto;
+}
+
+/* 小さな丸ボタン風に */
+.small-token-btn {
+    padding: 6px 8px;
+    font-size: 0.75rem;
+    border-radius: 999px;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    cursor: pointer;
+    min-width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 状態テキストは通常は隠してホバーで表示 */
+.token-status {
+    font-size: 0.8rem;
+    color: #fff;
+    white-space: nowrap;
+    max-width: 0;
+    overflow: hidden;
+    transition: max-width 0.18s ease, margin 0.18s ease, opacity 0.18s ease;
+    opacity: 0;
+    margin-left: 0;
+}
+
+/* ホバーでわずかに浮き、状態テキストを展開 */
+.token-control:hover {
+    transform: translateY(-3px);
+    opacity: 1;
+}
+.token-control:hover .token-status {
+    max-width: 160px;
+    margin-left: 8px;
+    opacity: 1;
+}
+
+/* モバイルではさらに控えめに（テキスト非表示、サイズ調整） */
+@media (max-width: 480px) {
+    .token-control {
+        right: 8px;
+        bottom: 8px;
+        padding: 4px;
+    }
+    .small-token-btn {
+        min-width: 32px;
+        height: 32px;
+        font-size: 0.72rem;
+    }
+    .token-status {
+        display: none;
+    }
+}
+
 /* レスポンシブデザイン */
 @media (max-width: 768px) {
     .container {

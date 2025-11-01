@@ -15,8 +15,12 @@ class QuizApp {
         this.lastQuizCount = 3;
         this.originalQuizzes = []; // 同じ問題でやり直し用
 
+        // Bearer トークン（localStorageで保存）
+        this.bearerToken = localStorage.getItem("bearer_token") || null;
+
         this.initializeElements();
         this.bindEvents();
+        this.updateTokenStatus();
     }
 
     // DOM要素の初期化
@@ -49,12 +53,21 @@ class QuizApp {
         this.finalTotal = document.getElementById("finalTotal");
         this.resultMessage = document.getElementById("resultMessage");
         this.backToTopBtn = document.getElementById("backToTopBtn");
+
+        // トークン入力ボタン・状態表示
+        this.tokenBtn = document.getElementById("tokenBtn");
+        this.tokenStatus = document.getElementById("tokenStatus");
     }
 
     // イベントリスナーの設定
     bindEvents() {
         this.generateBtn.addEventListener("click", () => this.generateQuiz());
         this.resetInputBtn.addEventListener("click", () => this.resetInput());
+        if (this.tokenBtn) {
+            this.tokenBtn.addEventListener("click", () =>
+                this.promptBearerToken()
+            );
+        }
 
         this.optionBtns.forEach((btn) => {
             btn.addEventListener("click", () => this.selectAnswer(btn));
@@ -118,10 +131,44 @@ class QuizApp {
         }
     }
 
+    // トークンをプロンプトで入力・保存
+    promptBearerToken() {
+        const current = localStorage.getItem("bearer_token") || "";
+        const token = prompt(
+            "Bearer token を入力してください（空にすると削除）:",
+            current
+        );
+        if (token === null) return; // キャンセル
+        if (token.trim() === "") {
+            localStorage.removeItem("bearer_token");
+            this.bearerToken = null;
+        } else {
+            localStorage.setItem("bearer_token", token.trim());
+            this.bearerToken = token.trim();
+        }
+        this.updateTokenStatus();
+    }
+
+    // トークン状態表示を更新
+    updateTokenStatus() {
+        if (!this.tokenStatus) return;
+        this.tokenStatus.textContent = this.bearerToken ? "設定済み" : "未設定";
+        this.tokenStatus.title = this.bearerToken
+            ? "Bearer token が設定されています"
+            : "Bearer token が未設定です";
+    }
+
     // サーバーサイドAPIを使用してクイズを生成
     async generateAIQuiz(studyContent, count) {
         try {
             console.log("AIクイズ生成開始 - サーバーAPIを呼び出し");
+            // Authorization ヘッダに Bearer トークンがあれば付与
+            const headers = {
+                "Content-Type": "application/json",
+            };
+            if (this.bearerToken) {
+                headers["Authorization"] = `Bearer ${this.bearerToken}`;
+            }
 
             // リクエストデータをログ出力
             const requestData = {
@@ -137,9 +184,7 @@ class QuizApp {
             // サーバーサイドのAPIエンドポイントを呼び出し
             const response = await fetch("/api/generate-quiz", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers,
                 body: JSON.stringify(requestData),
                 signal: controller.signal,
             });
@@ -148,7 +193,6 @@ class QuizApp {
 
             console.log("Response status:", response.status);
             console.log("Response headers:", response.headers);
-
             if (!response.ok) {
                 let status = response.status;
                 let errorMessage = `HTTPエラー: ${status}`;
