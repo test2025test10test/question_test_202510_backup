@@ -194,10 +194,6 @@ class QuizApp {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    // APIキーがあれば Authorization ヘッダに追加（オプション）
-                    ...(this.apiKey
-                        ? { Authorization: `Bearer ${this.apiKey}` }
-                        : {}),
                 },
                 body: JSON.stringify(payload),
             };
