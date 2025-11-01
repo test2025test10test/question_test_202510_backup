@@ -15,8 +15,21 @@ class QuizApp {
         this.lastQuizCount = 3;
         this.originalQuizzes = []; // 同じ問題でやり直し用
 
-        // Bearer トークン（localStorageで保存）
-        this.bearerToken = localStorage.getItem("bearer_token") || null;
+        // APIキー（localStorageで保存）
+        this.apiKey = localStorage.getItem("gemini_api_key") || null;
+        // 旧キー (bearer_token) が残っている場合は自動移行（ユーザが以前に入力していれば互換性のためコピー）
+        const legacy = localStorage.getItem("bearer_token");
+        if (!this.apiKey && legacy) {
+            console.log(
+                "[Token] migrating legacy bearer_token to gemini_api_key (masked)"
+            );
+            localStorage.setItem("gemini_api_key", legacy);
+            this.apiKey = legacy;
+            localStorage.removeItem("bearer_token");
+        }
+
+        // APIキーが入力されるまで強制的に促す
+        this.ensureApiKeyPresent();
 
         this.initializeElements();
         this.bindEvents();
@@ -54,19 +67,17 @@ class QuizApp {
         this.resultMessage = document.getElementById("resultMessage");
         this.backToTopBtn = document.getElementById("backToTopBtn");
 
-        // トークン入力ボタン・状態表示
-        this.tokenBtn = document.getElementById("tokenBtn");
-        this.tokenStatus = document.getElementById("tokenStatus");
+        // APIキー入力ボタン・状態表示
+        this.apiKeyBtn = document.getElementById("apiKeyBtn");
+        this.apiKeyStatus = document.getElementById("apiKeyStatus");
     }
 
     // イベントリスナーの設定
     bindEvents() {
         this.generateBtn.addEventListener("click", () => this.generateQuiz());
         this.resetInputBtn.addEventListener("click", () => this.resetInput());
-        if (this.tokenBtn) {
-            this.tokenBtn.addEventListener("click", () =>
-                this.promptBearerToken()
-            );
+        if (this.apiKeyBtn) {
+            this.apiKeyBtn.addEventListener("click", () => this.promptApiKey());
         }
 
         this.optionBtns.forEach((btn) => {
@@ -131,44 +142,69 @@ class QuizApp {
         }
     }
 
-    // トークンをプロンプトで入力・保存
-    promptBearerToken() {
-        const current = localStorage.getItem("bearer_token") || "";
+    // APIキーをプロンプトで入力・保存
+    promptApiKey() {
+        const current = "";
         const token = prompt(
-            "Bearer token を入力してください（空にすると削除）:",
+            "Gemini API キーを入力してください（空にすると削除）:",
             current
         );
         if (token === null) return; // キャンセル
         if (token.trim() === "") {
-            localStorage.removeItem("bearer_token");
-            this.bearerToken = null;
+            localStorage.removeItem("gemini_api_key");
+            this.apiKey = null;
         } else {
-            localStorage.setItem("bearer_token", token.trim());
-            this.bearerToken = token.trim();
+            localStorage.setItem("gemini_api_key", token.trim());
+            this.apiKey = token.trim();
         }
         this.updateTokenStatus();
+        return !!this.apiKey;
     }
 
-    // トークン状態表示を更新
+    // APIキーが存在するまで強制的に入力プロンプトを表示する
+    ensureApiKeyPresent() {
+        // 既に設定済みなら何もしない
+        if (this.apiKey) return;
+        // ループして必ず値が入るまで促す（ユーザーがタブを閉じれば抜けられます）
+        while (!this.apiKey) {
+            const ok = this.promptApiKey();
+            if (!ok) {
+                // ユーザーがキャンセルした場合も再度注意を促す
+                alert(
+                    "このアプリを利用するには Gemini API キーが必要です。キーを入力してください。"
+                );
+            }
+        }
+    }
+
+    // APIキー状態表示を更新
     updateTokenStatus() {
-        if (!this.tokenStatus) return;
-        this.tokenStatus.textContent = this.bearerToken ? "設定済み" : "未設定";
-        this.tokenStatus.title = this.bearerToken
-            ? "Bearer token が設定されています"
-            : "Bearer token が未設定です";
+        if (!this.apiKeyStatus) return;
+        const hasKey = this.apiKey || localStorage.getItem("gemini_api_key");
+        if (hasKey) {
+            this.apiKeyStatus.textContent = "設定済み";
+            this.apiKeyStatus.title = "Gemini API キーが設定されています";
+            console.log("[Token] gemini_api_key is set");
+        } else {
+            this.apiKeyStatus.textContent = "未設定";
+            this.apiKeyStatus.title = "APIキーが未設定です";
+            console.log("[Token] gemini_api_key is not set");
+        }
     }
 
     // サーバーサイドAPIを使用してクイズを生成
     async generateAIQuiz(studyContent, count) {
         try {
             console.log("AIクイズ生成開始 - サーバーAPIを呼び出し");
-            // Authorization ヘッダに Bearer トークンがあれば付与
+            // Authorization ヘッダに APIキー（または Bearer 形式）があれば付与
             const headers = {
                 "Content-Type": "application/json",
             };
-            if (this.bearerToken) {
-                headers["Authorization"] = `Bearer ${this.bearerToken}`;
+
+            while (!this.apiKey) {
+                this.ensureApiKeyPresent();
             }
+            headers["Authorization"] = `Bearer ${this.apiKey}`;
 
             // リクエストデータをログ出力
             const requestData = {

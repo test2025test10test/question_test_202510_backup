@@ -477,7 +477,7 @@ select:disabled {
     color: #721c24;
 }
 
-/* Bearer token ボタン（画面端に目立たない固定表示） */
+/* APIキーボタン（画面端に目立たない固定表示） */
 .token-control {
     position: fixed;
     right: 12px;
