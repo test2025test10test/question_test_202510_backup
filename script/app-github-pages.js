@@ -198,6 +198,8 @@ class QuizApp {
                 body: JSON.stringify(payload),
             };
 
+            console.log("API リクエスト送信");
+
             const response = await fetch(url, options);
 
             if (!response.ok) {
